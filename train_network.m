@@ -21,8 +21,8 @@
 %   Medium
 %   High
 % 
-function trained_net = train_network(P_train, T_train, P_test,T_test, ...
-    type,num_neurons, goal, specialization)
+function trained_net = train_network(P_train, T_train, type, ...
+    num_neurons, goal, specialization)
    
 %% Specialization (Ajust weight penalizations of the errors)
     weights_penalization = ones(1, length(P_train));
@@ -71,7 +71,18 @@ if strcmp(type, 'Multilayer') % feedforwardnet
         'useGPU', 'yes', ...
         'showResources','yes');
     
-elseif strcmp(type, 'Multilayer with delays') % layrecnet
+elseif strcmp(type, 'Multilayer with Delays') % layrecnet
+    
+    net = layrecnet(1:2,num_neurons);
+    
+    net.divideFcn = 'divideind';
+    [net.divideParam.trainInd,~,~] = divideind(length(P_train),1:length(P_train),[],[]);
+    
+    net.trainParam.epochs = 100;
+    trained_net = train(net, P_train, T_train, [],[],weights_penalization, ...
+        'useParallel','yes', ...
+        'useGPU', 'yes', ...
+        'showResources','yes');
 
 elseif strcmp(type, 'CNN')
     

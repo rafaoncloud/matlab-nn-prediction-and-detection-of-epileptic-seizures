@@ -15,7 +15,7 @@ function [P_train,T_train, P_test, T_test] = build_dataset( ...
     % Load raw dataset
     if dataset_idx == 1
         load('datasets/dataset_1/112502.mat');
-    elseif dataset_inx == 2
+    elseif dataset_idx == 2
         load('datasets/dataset_2/44202.mat');
     end
     
@@ -71,9 +71,30 @@ function [P_train,T_train, P_test, T_test] = build_dataset( ...
     P_train = P(training_idxs,:)';
     T_train = T(training_idxs,:)';
     
+    
+    
     % Remaining seizures to the test set
-    P_all_idxs = 1:length(P);
-    test_idxs = setdiff(P_all_idxs, training_idxs);
+    %P_all_idxs = 1:length(P);
+    %test_idxs = setdiff(P_all_idxs, training_idxs);
+    
+    seizures_idxs = [];
+    for i = num_seizures_training_data + 1 : total_seizures
+        seizures_idxs = [seizures_idxs start_preictal(i):1:end_posictal(i)];
+    end
+    
+    total_interictal = length(seizures_idxs) * balance;
+    
+    % If the number of total interictal is larger than the existing
+    % interictal instances, use only the available ones
+    if(total_interictal > (length(P) - length(seizures_idxs)))
+        total_interictal = length(P) - length(seizures_idxs);
+    end
+    
+    % Join interinctal (1) class and the remaining classes (2,3,4 -
+    % seizure)
+    test_idxs = horzcat(interictal_idxs,seizures_idxs);
+    test_idxs = sort(test_idxs);
+
     
     % Define the test set
     P_test = P(test_idxs,:)';
