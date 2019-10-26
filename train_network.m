@@ -86,7 +86,33 @@ elseif strcmp(type, 'Multilayer with Delays') % layrecnet
 
 elseif strcmp(type, 'CNN')
     
+    
+    
+    layers = [
+        imageInputLayer([29 29 1])
+        convolution2dLayer(5,20)
+        reluLayer
+        maxPooling2dLayer(2,'Stride',2)
+        fullyConnectedLayer(10)
+        softmaxLayer
+        classificationLayer
+    ];
+
+    options = trainingOptions('sgdm', ...
+        'InitialLearnRate',0.01, ...
+        'MaxEpochs',4, ...
+        'Shuffle','every-epoch', ...
+        'ValidationData',imdsValidation, ...
+        'ValidationFrequency',30, ...
+        'Verbose',false, ...
+        'Plots','training-progress');
+
+    trained_net = trainNetwork(P_train,layers, options);
+    
+    
 elseif strcmp(type, 'LSTM')
+    
+    
 
 end
 
