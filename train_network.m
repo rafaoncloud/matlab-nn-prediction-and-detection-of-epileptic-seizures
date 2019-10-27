@@ -86,12 +86,10 @@ elseif strcmp(type, 'Multilayer with Delays') % layrecnet
 
 elseif strcmp(type, 'CNN')
     
-    
-    
     layers = [
         imageInputLayer([29 29 1])
         convolution2dLayer(5,20)
-        reluLayer
+        reluLayer()
         maxPooling2dLayer(2,'Stride',2)
         fullyConnectedLayer(10)
         softmaxLayer
@@ -112,8 +110,41 @@ elseif strcmp(type, 'CNN')
     
 elseif strcmp(type, 'LSTM')
     
-    
+    numFeatures = 29;
+    numHiddenUnits = 100;
+    numClasses = 4;
+    layers = [
+        sequenceInputLayer(numFeatures)
+        lstmLayer(numHiddenUnits,'OutputMode','last')
+        fullyConnectedLayer(numClasses)
+        softmaxLayer
+        classificationLayer
+    ];
 
+    options = trainingOptions('sgdm', ...
+        'ExecutionEnvironment','auto', ...
+        'GradientThreshold',1, ...
+        'MaxEpochs',50, ...
+        'MiniBatchSize',29, ...
+        'SequenceLength','longest', ...
+        'Shuffle','never', ...
+        'Verbose',0, ...
+        'Plots','training-progress');
+
+    P_train = num2cell(P_train,1);
+    
+    class1_idx = find(T_train(1,:) == 1);
+    class2_idx = find(T_train(2,:) == 1);
+    class3_idx = find(T_train(3,:) == 1);
+    class4_idx = find(T_train(4,:) == 1);
+    T_train_vector = zeros(1, length(T_train)); 
+    T_train_vector(class1_idx) = 1;
+    T_train_vector(class2_idx) = 2;
+    T_train_vector(class3_idx) = 3;
+    T_train_vector(class4_idx) = 4;
+    T_train_vector = categorical(T_train_vector)';
+ 
+    trained_net = trainNetwork(P_train, T_train_vector, layers, options);
 end
 
     
