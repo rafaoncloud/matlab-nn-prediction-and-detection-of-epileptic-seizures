@@ -1,14 +1,14 @@
 function [P_train,T_train, P_test, T_test] = build_dataset( ...
     dataset_idx, ...
     num_features, ...
-    training_data_perc, ...
+    trainRatio, ...
     balance) 
 
     if dataset_idx < 1 || dataset_idx > 2
         error('Dataset index out of range [1;2]!');
-    elseif balance ~= 1 && balance ~= 10
-        error('Balance is not 1 or 10!')
-    elseif training_data_perc < 0 || training_data_perc > 1
+    elseif balance ~= 0 && balance ~= 1 && balance ~= 10
+        error('Balance is not 0 (non-balance), 1 or 10!')
+    elseif trainRatio < 0 || trainRatio > 1
         error('The training data percentage must range between 0 and 1!')
     end 
     
@@ -26,6 +26,30 @@ function [P_train,T_train, P_test, T_test] = build_dataset( ...
     % Reduce the number of features (by correlation value)
     P = reduce_dataset(FeatVectSel, Trg, num_features);
     
+    if balance == 0
+        disp('There is no class balancing. (Advised for time-series recurrent network and LSTM)');
+        
+        % Last index of the last posictal instance
+        posictal = find(T(:,4) == 1);
+        last_index = posictal(end);
+        
+        % Keep only data before that instance
+        P = P(1:last_index,:);
+        Q = length(P);
+        % valRatio = 0; % No validation data
+        testRatio =  1 - trainRatio;
+        [trainInd,testInd] = divideblock(Q, trainRatio, testRatio);
+        
+        % Define the training set
+        P_train = P(trainInd,:)';
+        T_train = T(trainInd,:)';
+        
+        % Define the test set
+        P_test = P(testInd,:)';
+        T_test = T(testInd,:)';
+        return;
+    end
+    
     % Vector that indicated the begining and end of each seizure (1 and -1)
     seizures = diff(Trg);
     % Indexes with the first pre-ictal (2) of each seizure
@@ -36,7 +60,7 @@ function [P_train,T_train, P_test, T_test] = build_dataset( ...
     total_seizures = length(start_preictal);
     
     % Number of seizures present in the training data
-    num_seizures_training_data = round(total_seizures * training_data_perc);
+    num_seizures_training_data = round(total_seizures * trainRatio);
     
     % Vector with preictal (2), ictal (3) and postictal (4) for the
     % training set
@@ -69,9 +93,7 @@ function [P_train,T_train, P_test, T_test] = build_dataset( ...
     
     % Define the training set
     P_train = P(training_idxs,:)';
-    T_train = T(training_idxs,:)';
-    
-    
+    T_train = T(training_idxs,:)';   
     
     % Remaining seizures to the test set
     %P_all_idxs = 1:length(P);
