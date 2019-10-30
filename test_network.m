@@ -88,8 +88,14 @@ function [prediction, detection]  = test_network(clf_type, trained_net, ...
     
     prediction.sensitivity = prediction.TP / (prediction.TP + prediction.FN);
     prediction.specificity = prediction.TN / (prediction.TN + prediction.FP);
+    prediction.accuracy = (prediction.TP + prediction.TN) / ...
+        (prediction.TP + prediction.TN + prediction.FP + prediction.FN);
     
     detection.sensitivity = detection.TP / (detection.TP + detection.FN);
     detection.specificity = detection.TN / (detection.TN + detection.FP);
+    detection.accuracy = (detection.TP + detection.TN) / ...
+        (detection.TP + detection.TN + detection.FP + detection.FN);
+    
+    
     
 end
