@@ -8,6 +8,7 @@ function [prediction, detection]  = test_network(clf_type, trained_net, ...
 
     T_pred = sim(trained_net, P_test);
 
+    
     for i = 1:length(T_pred)
         max = 1;
         for j = 2:4
@@ -16,7 +17,7 @@ function [prediction, detection]  = test_network(clf_type, trained_net, ...
             end
         end
         T_pred(:, i) = zeros(4, 1);
-        T_pred(max, i) = 1;
+        T_pred(max, i) = 1; % The predicted target is the one that has the highest value
     end
     
     %%%% ---------- Post-Processing ----------
@@ -45,6 +46,7 @@ function [prediction, detection]  = test_network(clf_type, trained_net, ...
     prediction.FN = 0;
     prediction.sensitivity = 0;
     prediction.specificity = 0;
+    prediction.accuracy = 0;
     
     detection.TP = 0;
     detection.TN = 0;
@@ -52,6 +54,7 @@ function [prediction, detection]  = test_network(clf_type, trained_net, ...
     detection.FN = 0;
     detection.sensitivity = 0;
     detection.specificity = 0;
+    detection.accuracy = 0;
     
     % Compare test targets with the predicted targets
     % Calculate TP, TN, FP and FN (values of confusion matrix)

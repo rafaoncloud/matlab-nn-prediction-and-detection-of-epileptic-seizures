@@ -59,17 +59,19 @@ function trained_net = train_network(P_train, T_train, type, ...
 %% Create and Train Network 
 if strcmp(type, 'Multilayer') % feedforwardnet
     
+    %[net.divideParam.trainInd,~,~] = divideind(length(P_train),1:length(P_train),[],[]);
     net = feedforwardnet(num_neurons);
     
-    net.divideFcn = 'divideind';
-    [net.divideParam.trainInd,~,~] = divideind(length(P_train),1:length(P_train),[],[]);
-    
-    net.trainFcn = 'trainscg';
+    net.divideFcn = 'divideblock';
+    net.divideParam.trainRatio = 0.90;
+    net.divideParam.valRatio = 0.10;
+    net.divideParam.testRatio = 0;  
+    net.trainFcn = 'traingd';
     net.trainParam.epochs = 1000;
-    trained_net = train(net, P_train, T_train, [],[],weights_penalization, ...
-        'useParallel','yes', ...
+    trained_net = train(net, P_train, T_train, [],[], weights_penalization, ...
+        'useParallel','no', ...
         'useGPU', 'no', ...
-        'showResources','yes');
+        'showResources','no');
     
 elseif strcmp(type, 'Multilayer with Delays') % layrecnet
     
@@ -78,11 +80,11 @@ elseif strcmp(type, 'Multilayer with Delays') % layrecnet
     net.divideFcn = 'divideind';
     [net.divideParam.trainInd,~,~] = divideind(length(P_train),1:length(P_train),[],[]);
     
-    net.trainParam.epochs = 10;
+    net.trainParam.epochs = 1000;
     trained_net = train(net, P_train, T_train, [],[],weights_penalization, ...
-        'useParallel','yes', ...
+        'useParallel','no', ...
         'useGPU', 'no', ...
-        'showResources','yes');
+        'showResources','no');
 
 elseif strcmp(type, 'CNN')
     
